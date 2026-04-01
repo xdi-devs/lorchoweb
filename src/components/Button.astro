@@ -1,0 +1,65 @@
+---
+interface Props {
+  href?:    string;
+  variant?: 'primary' | 'secondary' | 'orange' | 'ghost';
+  size?:    'sm' | 'md' | 'lg';
+  class?:   string;
+  type?:    'button' | 'submit' | 'reset';
+  external?: boolean;
+  disabled?: boolean;
+  ariaLabel?: string;
+}
+
+const {
+  href,
+  variant  = 'primary',
+  size     = 'md',
+  class: extraClass = '',
+  type     = 'button',
+  external = false,
+  disabled = false,
+  ariaLabel,
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'px-5 py-2.5 text-xs rounded-xl gap-1.5',
+  md: 'px-7 py-3.5 text-sm rounded-2xl gap-2',
+  lg: 'px-9 py-4 text-base rounded-2xl gap-2.5',
+};
+
+const variantClasses = {
+  primary:   'bg-brand-cyan text-brand-dark font-semibold hover:bg-white hover:scale-[1.02] shadow-cyan hover:shadow-cyan',
+  secondary: 'bg-transparent text-white font-semibold border border-white/20 hover:border-brand-cyan/60 hover:text-brand-cyan hover:bg-brand-cyan/5',
+  orange:    'bg-brand-orange text-white font-semibold hover:bg-brand-orange/90 hover:scale-[1.02] shadow-orange hover:shadow-orange',
+  ghost:     'bg-transparent text-brand-muted font-medium hover:text-white hover:bg-white/5 border border-transparent',
+};
+
+const baseClasses = [
+  'inline-flex items-center justify-center tracking-wide',
+  'transition-all duration-200 active:scale-[0.98]',
+  disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '',
+  sizeClasses[size],
+  variantClasses[variant],
+  extraClass,
+].join(' ');
+---
+
+{href ? (
+  <a
+    href={href}
+    class={baseClasses}
+    aria-label={ariaLabel}
+    {...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+  >
+    <slot />
+  </a>
+) : (
+  <button
+    type={type}
+    class={baseClasses}
+    disabled={disabled}
+    aria-label={ariaLabel}
+  >
+    <slot />
+  </button>
+)}

@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionTitle from '../components/SectionTitle.astro';
+import MatchCard from '../components/MatchCard.astro';
+import Button from '../components/Button.astro';
+import { getCollection } from 'astro:content';
+
+const allMatches = await getCollection('matches');
+const now        = new Date();
+
+// Split into past and future
+const upcoming = allMatches
+  .filter(m => !m.data.result && new Date(m.data.date) >= now)
+  .sort((a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime());
+
+const results = allMatches
+  .filter(m => !!m.data.result)
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+// Stats
+const wins   = results.filter(m => {
+  const r = m.data.result!;
+  return (r.goalsFor * 3 + r.pointsFor) > (r.goalsAgainst * 3 + r.pointsAgainst);
+}).length;
+const losses = results.filter(m => {
+  const r = m.data.result!;
+  return (r.goalsFor * 3 + r.pointsFor) < (r.goalsAgainst * 3 + r.pointsAgainst);
+}).length;
+const draws  = results.length - wins - losses;
+---
+
+<BaseLayout
+  title="Calendario e Resultados — GB Lorchos"
+  description="Consulta o calendario de partidos do GB Lorchos e os resultados da tempada 2025-26."
+>
+
+  <!-- Hero -->
+  <section class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0 bg-hero-gradient"></div>
+    <div class="absolute inset-0 hero-grid opacity-40"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="section-eyebrow justify-center">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
+        Tempada 2025–26
+      </span>
+      <h1 class="font-display font-900 uppercase text-white leading-none mt-2"
+          style="font-size: clamp(3.5rem, 8vw, 7rem);">
+        Calendario &<br/>
+        <span class="text-gradient-cyan">Resultados</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- Season stats -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { value: results.length, label: 'Partidos xogados', color: 'text-white' },
+          { value: wins,           label: 'Vitorias',          color: 'text-emerald-400' },
+          { value: draws,          label: 'Empates',           color: 'text-yellow-400' },
+          { value: losses,         label: 'Derrotas',          color: 'text-red-400' },
+        ].map(({ value, label, color }) => (
+          <div class="stat-card">
+            <span class={`font-display font-900 text-4xl leading-none ${color}`}>{value}</span>
+            <span class="text-xs text-brand-muted uppercase tracking-wider mt-2 text-center">{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Upcoming matches -->
+  {upcoming.length > 0 && (
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionTitle
+          eyebrow="Próximos encontros"
+          title="Calendario"
+          highlight="Calendario"
+          class="mb-10"
+        />
+        <div class="flex flex-col gap-3 mt-10">
+          {upcoming.map(match => (
+            <MatchCard
+              date={match.data.date}
+              time={match.data.time}
+              opponent={match.data.opponent}
+              venue={match.data.venue}
+              isHome={match.data.isHome}
+              competition={match.data.competition}
+              team={match.data.team}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Results -->
+  <section class="py-16 bg-brand-darker">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        eyebrow="Historial"
+        title="Resultados"
+        highlight="Resultados"
+      />
+      <div class="flex flex-col gap-3 mt-10">
+        {results.length > 0 ? results.map(match => (
+          <MatchCard
+            date={match.data.date}
+            time={match.data.time}
+            opponent={match.data.opponent}
+            venue={match.data.venue}
+            isHome={match.data.isHome}
+            competition={match.data.competition}
+            team={match.data.team}
+            result={match.data.result}
+          />
+        )) : (
+          <p class="text-brand-muted py-12 text-center">Non hai resultados aínda nesta tempada.</p>
+        )}
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

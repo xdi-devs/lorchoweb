@@ -1,0 +1,209 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionTitle from '../components/SectionTitle.astro';
+import PlayerCard from '../components/PlayerCard.astro';
+import Button from '../components/Button.astro';
+import { getCollection } from 'astro:content';
+
+// Read URL param (team filter)
+const url       = Astro.url;
+const teamParam = url.searchParams.get('team') ?? 'all'; // 'all' | 'lorchos' | 'lorchas'
+
+const allPlayers = await getCollection('players');
+
+const lorchos = allPlayers
+  .filter(p => p.data.team === 'Lorchos')
+  .sort((a, b) => (a.data.number ?? 99) - (b.data.number ?? 99));
+
+const lorchas = allPlayers
+  .filter(p => p.data.team === 'Lorchas')
+  .sort((a, b) => (a.data.number ?? 99) - (b.data.number ?? 99));
+
+const showLorchos = teamParam === 'all' || teamParam === 'lorchos';
+const showLorchas = teamParam === 'all' || teamParam === 'lorchas';
+---
+
+<BaseLayout
+  title="Xogadores e Xogadoras — GB Lorchos e GB Lorchas"
+  description="Coñece o plantel masculino e feminino do GB Lorchos."
+>
+
+  <!-- ══ PAGE HERO ════════════════════════════════════════════════════════ -->
+  <section class="relative pt-32 pb-20 overflow-hidden">
+    <div class="absolute inset-0 bg-hero-gradient"></div>
+    <div class="absolute inset-0 hero-grid opacity-40"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-brand-cyan/5 blur-[100px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="section-eyebrow justify-center">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
+        Tempada 2025–26
+      </span>
+      <h1 class="font-display font-900 uppercase text-white leading-none mt-2"
+          style="font-size: clamp(3.5rem, 8vw, 7rem);">
+        O noso<br/>
+        <span class="text-gradient-cyan">Plantel</span>
+      </h1>
+      <p class="section-subtitle mx-auto max-w-lg mt-4">
+        Homes e mulleres que fan do fútbol gaélico un estilo de vida en Galicia.
+        Cada xogador é unha peza fundamental desta familia.
+      </p>
+
+      <!-- Filter tabs -->
+      <div class="inline-flex items-center gap-2 mt-10 p-1.5 rounded-2xl bg-brand-slate border border-white/10">
+        {[
+          { value: 'all',     label: 'Todos/as'  },
+          { value: 'lorchos', label: 'Lorchos' },
+          { value: 'lorchas', label: 'Lorchas' },
+        ].map(({ value, label }) => (
+          <a
+            href={value === 'all' ? '/xogadores' : `/xogadores?team=${value}`}
+            class={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              teamParam === value || (value === 'all' && teamParam !== 'lorchos' && teamParam !== 'lorchas')
+                ? 'bg-brand-cyan text-brand-dark shadow-cyan'
+                : 'text-brand-muted hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ LORCHOS (MASCULINO) ═══════════════════════════════════════════════ -->
+  {showLorchos && (
+    <section class="py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+          <div>
+            <SectionTitle
+              eyebrow="Equipo masculino"
+              title="GB Lorchos"
+              highlight="Lorchos"
+              accentColor="cyan"
+            />
+            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-cyan/5 border border-brand-cyan/20">
+              <span class="text-brand-cyan text-xs font-mono">
+                {lorchos.length} xogadores
+              </span>
+              <span class="text-brand-muted text-xs">·</span>
+              <span class="text-brand-muted text-xs font-italic">"Somos Lorchos"</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Players grid -->
+        {lorchos.length > 0 ? (
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+            {lorchos.map(player => (
+              <PlayerCard
+                name={player.data.name}
+                position={player.data.position}
+                team={player.data.team}
+                image={player.data.image}
+                number={player.data.number}
+                captain={player.data.captain}
+                from={player.data.from}
+                since={player.data.since}
+                slug={player.slug}
+              />
+            ))}
+          </div>
+        ) : (
+          <div class="py-20 text-center text-brand-muted">
+            <p>O plantel está en actualización. Volve pronto!</p>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- Divider between sections -->
+  {showLorchos && showLorchas && (
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glow-divider"></div>
+    </div>
+  )}
+
+  <!-- ══ LORCHAS (FEMININO) ════════════════════════════════════════════════ -->
+  {showLorchas && (
+    <section class="py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+          <div>
+            <SectionTitle
+              eyebrow="Equipo feminino"
+              title="GB Lorchas"
+              highlight="Lorchas"
+              accentColor="orange"
+            />
+            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange/5 border border-brand-orange/20">
+              <span class="text-brand-orange text-xs font-mono">
+                {lorchas.length} xogadoras
+              </span>
+              <span class="text-brand-muted text-xs">·</span>
+              <span class="text-brand-muted text-xs font-italic">"Somos Lorchas"</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Players grid -->
+        {lorchas.length > 0 ? (
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+            {lorchas.map(player => (
+              <PlayerCard
+                name={player.data.name}
+                position={player.data.position}
+                team={player.data.team}
+                image={player.data.image}
+                number={player.data.number}
+                captain={player.data.captain}
+                from={player.data.from}
+                since={player.data.since}
+                slug={player.slug}
+              />
+            ))}
+          </div>
+        ) : (
+          <div class="py-20 text-center text-brand-muted">
+            <p>O plantel está en actualización. Volve pronto!</p>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- ══ JOIN CTA ══════════════════════════════════════════════════════════ -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glass-card glow-card-cyan p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div>
+          <h3 class="font-display font-800 text-white uppercase text-3xl leading-tight">
+            Queres formar parte<br/>do noso plantel?
+          </h3>
+          <p class="text-brand-muted mt-2">
+            Non importa o teu nivel. Ven a un adestramento e descubre o fútbol gaélico.
+          </p>
+        </div>
+        <div class="shrink-0">
+          <Button href="/contacto" variant="primary" size="lg">
+            Contacta co club
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script>
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }}),
+    { threshold: 0.05 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>

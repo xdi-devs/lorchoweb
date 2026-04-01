@@ -1,0 +1,51 @@
+---
+interface Props {
+  eyebrow?:  string;
+  title:     string;
+  highlight?: string; // word(s) to color in cyan
+  subtitle?: string;
+  align?:    'left' | 'center' | 'right';
+  accentColor?: 'cyan' | 'orange';
+}
+
+const {
+  eyebrow,
+  title,
+  highlight,
+  subtitle,
+  align       = 'left',
+  accentColor = 'cyan',
+} = Astro.props;
+
+const alignClass = {
+  left:   'text-left items-start',
+  center: 'text-center items-center',
+  right:  'text-right items-end',
+}[align];
+
+const accentGradient = accentColor === 'cyan' ? 'text-gradient-cyan' : 'text-gradient-orange';
+const dotColor       = accentColor === 'cyan' ? 'bg-brand-cyan' : 'bg-brand-orange';
+const eyebrowColor   = accentColor === 'cyan' ? 'text-brand-cyan' : 'text-brand-orange';
+
+// Build highlighted title
+let titleHtml = title;
+if (highlight) {
+  titleHtml = title.replace(
+    highlight,
+    `<span class="${accentGradient}">${highlight}</span>`
+  );
+}
+---
+
+<div class={`flex flex-col gap-0 ${alignClass}`}>
+  {eyebrow && (
+    <span class={`section-eyebrow ${eyebrowColor}`}>
+      <span class={`w-1.5 h-1.5 rounded-full ${dotColor} animate-pulse-slow`}></span>
+      {eyebrow}
+    </span>
+  )}
+  <h2 class="section-title" set:html={titleHtml} />
+  {subtitle && (
+    <p class="section-subtitle max-w-xl">{subtitle}</p>
+  )}
+</div>

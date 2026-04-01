@@ -1,0 +1,92 @@
+---
+interface Props {
+  name:     string;
+  position: string;
+  team:     'Lorchos' | 'Lorchas';
+  image?:   string;
+  number?:  number;
+  captain?: boolean;
+  from?:    string;
+  since?:   number;
+  slug?:    string;
+}
+
+const {
+  name,
+  position,
+  team,
+  image   = '/images/player-placeholder.svg',
+  number,
+  captain = false,
+  from,
+  since,
+} = Astro.props;
+
+const isLorchos = team === 'Lorchos';
+const accentClass  = isLorchos ? 'text-brand-cyan'   : 'text-brand-orange';
+const borderClass  = isLorchos ? 'border-brand-cyan/20 hover:border-brand-cyan/50' : 'border-brand-orange/20 hover:border-brand-orange/50';
+const glowBg       = isLorchos ? 'rgba(0,205,255,0.06)' : 'rgba(245,138,32,0.06)';
+const dotColor     = isLorchos ? 'bg-brand-cyan' : 'bg-brand-orange';
+---
+
+<article
+  class={`group relative flex flex-col rounded-3xl bg-brand-slate border ${borderClass} overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card`}
+>
+  <!-- Number badge -->
+  {number && (
+    <div class={`absolute top-4 left-4 z-10 w-8 h-8 rounded-xl flex items-center justify-center bg-brand-dark/80 backdrop-blur-sm border border-white/10`}>
+      <span class={`font-mono text-xs font-bold ${accentClass}`}>{number}</span>
+    </div>
+  )}
+
+  <!-- Captain badge -->
+  {captain && (
+    <div class="absolute top-4 right-4 z-10 badge badge-orange text-[10px]">
+      Capitán{team === 'Lorchas' ? 'a' : ''}
+    </div>
+  )}
+
+  <!-- Player image -->
+  <div class="relative aspect-[4/5] overflow-hidden bg-brand-darker">
+    <div
+      class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+      style={`background: radial-gradient(ellipse at 50% 100%, ${glowBg} 0%, transparent 70%)`}
+    ></div>
+    <img
+      src={image}
+      alt={`Foto de ${name}`}
+      loading="lazy"
+      decoding="async"
+      class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+    />
+    <!-- Bottom gradient overlay -->
+    <div class="absolute bottom-0 inset-x-0 h-2/5 bg-gradient-to-t from-brand-slate to-transparent"></div>
+  </div>
+
+  <!-- Info -->
+  <div class="p-5 flex flex-col gap-1 relative">
+    <div class={`text-xs font-mono font-semibold uppercase tracking-widest ${accentClass} flex items-center gap-1.5`}>
+      <span class={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
+      {position}
+    </div>
+    <h3 class="font-display font-700 text-white text-xl uppercase tracking-wide leading-tight">
+      {name}
+    </h3>
+    {(from || since) && (
+      <div class="flex items-center gap-3 mt-1.5">
+        {from && (
+          <span class="text-xs text-brand-muted flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {from}
+          </span>
+        )}
+        {since && (
+          <span class="text-xs text-brand-muted flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Dende {since}
+          </span>
+        )}
+      </div>
+    )}
+  </div>
+</article>

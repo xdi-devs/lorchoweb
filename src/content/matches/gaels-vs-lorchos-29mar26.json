@@ -1,0 +1,15 @@
+{
+  "date": "2026-03-29",
+  "time": "19:00",
+  "opponent": "Estrela Gaels",
+  "venue": "Campo de Chaián, Trazo",
+  "isHome": false,
+  "competition": "Liga Shield",
+  "team": "Lorchos",
+    "result": {
+    "goalsFor": 3,
+    "goalsAgainst": 6,
+    "pointsFor": 8,
+    "pointsAgainst": 8
+  }
+}

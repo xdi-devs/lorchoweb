@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/Button.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const news = await getCollection('news');
+  return news.map(article => ({
+    params: { slug: article.slug },
+    props:  { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content }  = await article.render();
+
+const formattedDate = new Intl.DateTimeFormat('gl-ES', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+}).format(article.data.date);
+---
+
+<BaseLayout
+  title={article.data.title}
+  description={article.data.description}
+  image={article.data.image}
+>
+
+  <!-- Article Hero -->
+  <section class="relative pt-32 pb-12 overflow-hidden">
+    <div class="absolute inset-0 bg-hero-gradient"></div>
+    <div class="absolute inset-0 hero-grid opacity-30"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Button href="/noticias" variant="ghost" size="sm" class="mb-8">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Todas as noticias
+      </Button>
+      <span class={`badge ${article.data.category === 'Resultados' ? 'badge-cyan' : article.data.category === 'Fichaxes' ? 'badge-orange' : 'badge-white'} mb-6`}>
+        {article.data.category}
+      </span>
+      <h1 class="font-display font-900 text-white uppercase leading-none mb-6"
+          style="font-size: clamp(2.5rem, 6vw, 5rem);">
+        {article.data.title}
+      </h1>
+      <div class="flex items-center gap-4 text-sm text-brand-muted">
+        <span class="flex items-center gap-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {formattedDate}
+        </span>
+        <span>·</span>
+        <span>{article.data.author}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Article content -->
+  <article class="pb-24">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Featured image -->
+      {article.data.image && (
+        <div class="rounded-3xl overflow-hidden aspect-video mb-12 bg-brand-slate border border-white/5">
+          <img src={article.data.image} alt={article.data.title} class="w-full h-full object-cover" />
+        </div>
+      )}
+
+      <!-- Prose content -->
+      <div class="prose prose-invert prose-lg max-w-none
+                  prose-headings:font-display prose-headings:uppercase
+                  prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
+                  prose-strong:text-white
+                  prose-p:text-brand-muted prose-p:leading-relaxed">
+        <Content />
+      </div>
+
+      <!-- Back button -->
+      <div class="mt-16 pt-10 border-t border-white/10">
+        <Button href="/noticias" variant="secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Volver a noticias
+        </Button>
+      </div>
+    </div>
+  </article>
+
+</BaseLayout>

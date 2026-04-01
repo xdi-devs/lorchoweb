@@ -1,0 +1,75 @@
+---
+interface Props {
+  title:       string;
+  description: string;
+  date:        Date;
+  image?:      string;
+  category?:   string;
+  slug:        string;
+  featured?:   boolean;
+}
+
+const {
+  title,
+  description,
+  date,
+  image    = '/images/news-placeholder.svg',
+  category = 'Club',
+  slug,
+  featured = false,
+} = Astro.props;
+
+const formattedDate = new Intl.DateTimeFormat('gl-ES', {
+  day: 'numeric', month: 'long', year: 'numeric'
+}).format(date);
+
+const categoryColors: Record<string, string> = {
+  Resultados: 'badge-cyan',
+  Fichaxes:   'badge-orange',
+  Eventos:    'badge-white',
+  Club:       'badge-white',
+};
+const badgeClass = categoryColors[category] ?? 'badge-white';
+---
+
+<article class={`group relative flex flex-col rounded-3xl bg-brand-slate border border-white/5 hover:border-brand-cyan/20 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card ${featured ? 'ring-1 ring-brand-cyan/20' : ''}`}>
+  <!-- Image -->
+  <div class="relative aspect-video overflow-hidden bg-brand-darker">
+    <img
+      src={image}
+      alt={title}
+      loading="lazy"
+      decoding="async"
+      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-brand-slate via-transparent to-transparent opacity-60"></div>
+    <div class="absolute top-4 left-4">
+      <span class={`badge ${badgeClass}`}>{category}</span>
+    </div>
+    {featured && (
+      <div class="absolute top-4 right-4">
+        <span class="badge bg-brand-cyan/20 text-brand-cyan border-brand-cyan/30 text-[10px]">Destacado</span>
+      </div>
+    )}
+  </div>
+
+  <!-- Content -->
+  <div class="p-6 flex flex-col flex-1">
+    <time class="text-xs text-brand-muted font-mono">{formattedDate}</time>
+    <h3 class="font-display font-700 text-white text-xl uppercase leading-tight mt-2 mb-3 group-hover:text-brand-cyan transition-colors duration-200">
+      {title}
+    </h3>
+    <p class="text-sm text-brand-muted leading-relaxed flex-1">
+      {description}
+    </p>
+    <a
+      href={`/noticias/${slug}`}
+      class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-cyan hover:gap-3 transition-all duration-200"
+    >
+      Ler máis
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+  </div>
+</article>

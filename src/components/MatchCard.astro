@@ -1,0 +1,101 @@
+---
+interface MatchResult {
+  goalsFor:     number;
+  goalsAgainst: number;
+  pointsFor:    number;
+  pointsAgainst: number;
+}
+interface Props {
+  date:        string;
+  time?:       string;
+  opponent:    string;
+  venue:       string;
+  isHome?:     boolean;
+  competition?: string;
+  team:        'Lorchos' | 'Lorchas' | 'Ambos';
+  result?:     MatchResult;
+}
+
+const {
+  date,
+  time,
+  opponent,
+  venue,
+  isHome      = true,
+  competition = 'Liga Galega',
+  team,
+  result,
+} = Astro.props;
+
+const matchDate = new Date(date);
+const isPast    = matchDate < new Date();
+
+const formattedDate = new Intl.DateTimeFormat('gl-ES', {
+  weekday: 'short', day: 'numeric', month: 'short'
+}).format(matchDate);
+
+// Calculate GAA score: goals*3 + points
+const scoreStr = result
+  ? `${result.goalsFor}-${result.pointsFor} / ${result.goalsAgainst}-${result.pointsAgainst}`
+  : null;
+
+const totalFor     = result ? (result.goalsFor     * 3 + result.pointsFor)     : 0;
+const totalAgainst = result ? (result.goalsAgainst * 3 + result.pointsAgainst) : 0;
+const winStatus    = result
+  ? (totalFor > totalAgainst ? 'win' : totalFor < totalAgainst ? 'loss' : 'draw')
+  : null;
+
+const resultLabel = { win: 'Vitoria', loss: 'Derrota', draw: 'Empate' };
+const isLorchos   = team === 'Lorchos';
+const accentClass = isLorchos ? 'text-brand-cyan' : 'text-brand-orange';
+const dotColor    = isLorchos ? 'bg-brand-cyan' : 'bg-brand-orange';
+---
+
+<div class="group flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl bg-brand-slate border border-white/5 hover:border-white/10 transition-all duration-200">
+  <!-- Date block -->
+  <div class="flex sm:flex-col items-center sm:w-20 gap-3 sm:gap-0 sm:text-center shrink-0">
+    <div class={`w-2 h-2 rounded-full ${dotColor} sm:mb-2`}></div>
+    <div class="font-display font-700 text-white text-base uppercase">{formattedDate}</div>
+    {time && <div class="text-xs text-brand-muted font-mono">{time}h</div>}
+  </div>
+
+  <!-- Divider (desktop) -->
+  <div class="hidden sm:block w-px h-12 bg-white/10 shrink-0"></div>
+
+  <!-- Main info -->
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-xs font-mono text-brand-muted">{competition}</span>
+      <span class={`text-xs px-2 py-0.5 rounded-full border ${isLorchos ? 'text-brand-cyan border-brand-cyan/20 bg-brand-cyan/5' : 'text-brand-orange border-brand-orange/20 bg-brand-orange/5'}`}>
+        {team}
+      </span>
+    </div>
+    <h3 class="font-display font-700 text-white text-lg uppercase">
+      {isHome ? 'GB Lorchos' : opponent}
+      <span class="text-brand-muted font-400 text-sm mx-2">vs</span>
+      {isHome ? opponent : 'GB Lorchos'}
+    </h3>
+    <p class="text-xs text-brand-muted mt-1 flex items-center gap-1">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      {venue} · {isHome ? 'Casa' : 'Fóra'}
+    </p>
+  </div>
+
+  <!-- Result or upcoming -->
+  <div class="shrink-0 text-right">
+    {result && winStatus ? (
+      <div class="flex flex-col items-end gap-1">
+        <span class={`badge border text-xs ${winStatus === 'win' ? 'result-win' : winStatus === 'loss' ? 'result-loss' : 'result-draw'}`}>
+          {resultLabel[winStatus]}
+        </span>
+        <span class={`font-display font-800 text-lg ${accentClass}`}>{scoreStr}</span>
+        <span class="text-xs text-brand-muted font-mono">({totalFor} – {totalAgainst})</span>
+      </div>
+    ) : (
+      <div class="flex flex-col items-end gap-1">
+        <span class="badge badge-white text-xs">Próximo</span>
+        <span class="text-xs text-brand-muted">Pendente</span>
+      </div>
+    )}
+  </div>
+</div>
